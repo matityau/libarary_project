@@ -4,25 +4,23 @@ The project has an interface where it will be possible to manage the status of m
 
 ## Project structure
 ```
-library-api/
-│
-├──app
-|   |
-|  main.py
-|
-├── database/
-│ ├── db_connection.py
-│ ├── book_db.py
-│ └── member_db.py
-├── routes/
-│ ├── book_routes.py
-│ ├── member_routes.py
-│ └── report_routes.py
-├── logs/
-│ └── app.log
-│
-├── README.md
-├── requirements.txt
+library-api/  
+│  
+├── app/  
+│   ├── main.py  
+│   ├── database/  
+│   │   ├── db\_connection.py  
+│   │   ├── book\_db.py  
+│   │   └── member\_db.py  
+│   ├── routes/  
+│   │   ├── book\_routes.py  
+│   │   ├── member\_routes.py  
+│   │   └── report\_routes.py  
+│   └── logs/  
+│       └── app.log  
+│  
+├── README.md  
+├── requirements.txt  
 └── .gitignore
 ```
 ## Database container
@@ -33,28 +31,35 @@ docker run --name libarary_db -e MYSQL_ROOT_PASSWORD=root -e MYSQL_DATABASE=liba
 
 ## Tables structure
 ### Book table
-Each book will have a unique ID, a title, an author's name, a genre that is one of the following: Fiction | Non-Fiction | Science | History | Other. 
-
-The book will be listed as to whether it is available for loan or not, and if a friend has lent the book, the name of the borrower will be listed.
+| שדה | הסבר |
+| ----- | ----: |
+| `id` | מפתח ראשי |
+| `title` | כותרת הספר, עמודה לא ריקה, מקסימום 50 תווים |
+| `author` | שם המחבר, עמודה לא ריקה, מקסימום 50 תווים |
+| `genre` | **ערכי `genre` מותרים:**  Fiction | Non-Fiction | Science | History | Other — מומש כעמודת ENUM במסד הנתונים, כל ערך אחר מחזיר שגיאה, עמודה לא ריקה |
+| `is_available` | האם הספר זמין להשאלה — FALSE מסמן הושאל עמודה לא ריקה |
+| `borrowed_by_member_id` | מזהה החבר שמחזיק את הספר — NULL אם זמין |
 
 ### Members table
-Each member will have a unique ID, a name up to 50 characters long, no blank column allowed.
-Unique email, no blank column allowed.
-A column showing whether the member is active and can borrow a book.
-And a counter that counts the number of questions given to that member.
+| שדה | הסבר |
+| ----- | ----: |
+| `id` | מפתח ראשי |
+| `name` | שם החבר, עמודה לא ריקה, מקסימום 50 תווים |
+| `email` | כתובת מייל — ייחודית, עמודה לא ריקה |
+| `is_active` | האם החבר פעיל — FALSE לא יכול להשאיל עמודה לא ריקה |
+| `total_borrows` | מונה סה"כ השאלות — עולה ב-1 בכל השאלה עמודה לא ריקה |
 
 ## System rules
-1. Create a book - the user sends a title, author name and gener, the system adds
-is_available=True, borrowed_by=NULL.
-2.genre - must be one of Fiction / Non-Fiction / Science / History / Other, any other value returns an error. Validation must be performed on addition and update.
-3. create member - the user sends email/name - the system adds, True=active_is
-total_borrows=0.
-4. email - must be unique - if it already exists, an error is returned/
-5. Inactive member - if False=active_is - a book cannot be borrowed.
-6. Book unavailable - a book that has already been borrowed cannot be borrowed (False=available_is)
-7. Maximum books - a member cannot have more than 3 books at a time.
-
-8. Return a book - a book can only be returned if it is borrowed by the same member who is returning it.    
+| חוק | נושא | הכלל |
+| ----: | ----: | ----: |
+| 1 | יצירת ספר | המשתמש שולח title/author/genre — המערכת מוסיפה `is_available=True`, `borrowed_by=NULL` |
+| 2 | genre | חייב להיות Fiction / Non-Fiction / Science / History / Other — כל ערך אחר מחזיר שגיאה יש לוודא הן בהוספה (POST) והן בעדכון (PATCH) |
+| 3 | יצירת חבר | המשתמש שולח name/email — המערכת מוסיפה `is_active=True`, `total_borrows=0` |
+| 4 | email | חייב להיות ייחודי — אם קיים כבר מחזיר שגיאה |
+| 5 | חבר לא פעיל | אם `is_active=False` — אי אפשר להשאיל ספר |
+| 6 | ספר לא זמין | אי אפשר להשאיל ספר שכבר מושאל (`is_available=False`) |
+| 7 | מקסימום ספרים | חבר לא יכול להחזיק יותר מ-3 ספרים בו-זמנית |
+| 8 | החזרת ספר | ניתן להחזיר ספר רק אם הוא מושאל לאותו חבר שמחזיר אותו |
 
 ### Endpoints list
 ### BOOKS
@@ -81,7 +86,11 @@ total_borrows=0.
 http request -> fastapi -> endpoints -> query -> database
 
 ## Running instructions
-python main.app
+cd app
+python -m venv venv
+python ./venv/Scripts/activate
+pip install -r requierments.txt
+python main.py
 
 
 
