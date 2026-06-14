@@ -6,7 +6,7 @@ def get_connection():
         port ="3306",
         user = "root",
         password ="root",
-        database = "soldiers_db",
+        database = "libarary_db",
         use_pure=True
         )                    
     return conn
