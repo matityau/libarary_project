@@ -147,10 +147,10 @@ class Books:
     def count_by_genre(self):
         conn = db_connection.get_connection()
         cursor = conn.cursor(dictionary=True)
-        sql_count = "SELECT COUNT(*)as total FROM books order by genre;"
+        sql_count = "SELECT genre, COUNT(*) FROM books GROUP BY genre;"
         try:
             cursor.execute(sql_count)
-            rows = cursor.fetchone()
+            rows = cursor.fetchall()
             return rows
         except Exception as e:
             raise e

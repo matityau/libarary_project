@@ -151,7 +151,7 @@ class Members:
         sql = "SELECT * FROM members ORDER BY borrows_total DESC LIMIT 1;"
         try:
             cursor.execute(sql)
-            rows = cursor.rowcount
+            rows = cursor.fetchone()
             return rows
         except Exception as e:
             raise e   
