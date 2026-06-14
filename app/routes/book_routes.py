@@ -1,5 +1,7 @@
 from fastapi import APIRouter,HTTPException
 from database import book_db
+from database.book_db import book_table
+from database.member_db import members_table
 from pydantic import BaseModel
 from typing import Optional
 import logging 
@@ -9,7 +11,8 @@ logging.basicConfig(level=logging.INFO,format="%(asctime)s|%(levelname)s|%(messa
 logger = logging.getLogger(__name__)
 
 router = APIRouter()
-book_table = book_db.Books()
+
+
 
 class Book(BaseModel):
     title:str
@@ -66,37 +69,55 @@ def get_book_by_id(id:int):
     
 @router.patch("/{id}")
 def update_book(id,data:BookUpdate):
-    logger.info(f"PATCH/books/{id}")
-    dict_data = data.model_dump(exclude_none=True)
+    try:    
+        logger.info(f"PATCH/books/{id}")
+        dict_data = data.model_dump(exclude_none=True)
 
-    if not dict_data:
-        logger.warning("Not data filled")
-        raise HTTPException(status_code=400, detail="No filed data")
+        if not dict_data:
+            logger.warning("Not data filled")
+            raise HTTPException(status_code=400, detail="No filed data")
+        
+        update = book_table.update_book(id,dict_data)
+
+        if not update:
+            logger.warning(f"Book {id} not found")
+            raise HTTPException(status_code=404, detail="Book not found")
+        return {"message":f"book {id}","filed_update":dict_data}
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Server Error:{e}")
+        raise HTTPException(status_code=500,detail=f"error{e}")
     
-    update = book_table.update_book(id,dict_data)
 
-    if not update:
-        logger.warning(f"Book {id} not found")
-        raise HTTPException(status_code=404, detail="Book not found")
-    return {"message":f"book {id}","filed_update":dict_data}
-
-@router.put("/{id}/borrow/{member_id}")
+@router.patch("/{id}/borrow/{member_id}")
 def borrow_book(book_id:int,member_id:int):
-    logger.info(f"PUT/books {id} borrow/{member_id}")
-    book = book_table.get_book_by_id(book_id)
-    if not book:
-        logger.error(f"Book {id} not found")
-        raise HTTPException(status_code=404,detail="BNook not found")
-    member = ""
-    if not member:
-        logger.error(f"member {member_id} not found")
-        raise HTTPException(status_code=404,detail="Member not found")
-    sucsses = book_table.set_available(book_id,False,member_id)
-    if not sucsses: 
-        logger.info(f"book not update")   
-        raise HTTPException(status_code=400,detail=f"Book is not available")
-    logger.info(f"book{id} borrow by {member_id}") 
-    return {"messaage":f"The book {book_id} is borrow by  member{member_id}"}
+    try:
+        logger.info(f"PUT/books {id} borrow/{member_id}")
+        book = book_table.get_book_by_id(book_id)
+        if not book:
+            logger.error(f"Book {book_id} not found")
+            raise HTTPException(status_code=404,detail=f"Book id:{book_id}not found")
+        member = members_table.get_member_by_id(member_id)
+        
+        if not member:
+            logger.error(f"member {member_id} not found")
+            raise HTTPException(status_code=404,detail="Member not found")
+        sucsses = book_table.set_available(book_id,False,member_id)
+        print(sucsses)
+        if not sucsses: 
+            logger.info(f"book not update")   
+            raise HTTPException(status_code=400,detail=f"Book id:{book_id} is not available")
+        members_table.increment_borrows(member_id)
+        logger.info(f"book{id} borrow by {member_id}") 
+        return {"messaage":f"The book {book_id} is borrow by  member{member_id}"}
+   
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Server Error:{e}")
+        raise HTTPException(status_code=500,detail=f"error{e}")
+    
 
 
     

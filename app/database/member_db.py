@@ -114,11 +114,11 @@ class Members:
             cursor.close()
             conn.close()
 
-    def increment_borrows(self,id):
+    def increment_borrows(self,id)->bool:
         conn = db_connection.get_connection()
         cursor = conn.cursor()
         sql_increment_borrows = """UPDATE members
-                             SET borrows_total + 1 WHERE id = %s""" 
+                             SET borrows_total = borrows_total + 1 WHERE id = %s""" 
         values = (id)
         try:
             cursor.execute(sql_increment_borrows,(values))
@@ -130,3 +130,19 @@ class Members:
         finally:
             cursor.close()
             conn.close() 
+    def count_active_members(self)-> int:
+        conn = db_connection.get_connection()
+        cursor = conn.cursor()
+        sql_count_active= """SELECT COUNT(*) as total FROM members WHERE is_active = TRUE""" 
+        try:
+            cursor.execute(sql_count_active)
+            rows = cursor.rowcount
+            return rows
+        except Exception as e:
+            raise e   
+        finally:
+            cursor.close()
+            conn.close() 
+        
+
+members_table = Members()

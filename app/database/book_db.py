@@ -3,6 +3,7 @@ import mysql.connector
 
 
 class Books:
+
     def __init__(self) -> None:
         self.conn = db_connection.get_connection()
         
@@ -10,7 +11,7 @@ class Books:
     def create_book(self,data:dict):
         conn = db_connection.get_connection()
         cursor = conn.cursor(dictionary=True)
-        sql_insert = """INSERT INTO books (title,author,genre,available_is) 
+        sql_insert = """INSERT INTO books (title,author,genre,is_available) 
         VALUES (%s,%s,%s,%s);"""
         values = (data["title"], data["author"], data["genre"],True)
         try:
@@ -80,7 +81,7 @@ class Books:
         conn = db_connection.get_connection()
         cursor = conn.cursor()
         sql_update_book = """UPDATE books
-                    SET available_is = %s,
+                    SET is_available = %s,
                     borrowed_by_member_id=%s
                     WHERE id = %s;""" 
         values = (val,member_id,book_id) 
@@ -88,7 +89,7 @@ class Books:
         try:
             cursor.execute(sql_update_book,(values))
             conn.commit()
-            cursor.close()
+            
             rows = cursor.rowcount
             return rows > 0
         except Exception as e:
@@ -158,7 +159,7 @@ class Books:
     def count_active_borrows_by_member(self, member_id):
         conn = db_connection.get_connection()
         cursor = conn.cursor(dictionary=True)
-        sql_count = "SELECT COUNT(*) FROM books WHERE id_member_by_borrowed = %s AND WHERE available_is = TRUE;"
+        sql_count = "SELECT COUNT(*) FROM books WHERE id_member_by_borrowed = %s,is_available = TRUE;"
         try:
             cursor.execute(sql_count,(member_id))
             rows = cursor.fetchall()
@@ -168,3 +169,6 @@ class Books:
         finally:
             cursor.close()
             conn.close()
+
+
+book_table = Books()
