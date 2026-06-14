@@ -6,7 +6,7 @@ def get_connection():
         port ="3306",
         user = "root",
         password ="root",
-        database = "libarary_db",
+        database = "libarary",
         use_pure=True
         )                    
     return conn

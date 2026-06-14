@@ -5,7 +5,7 @@ from database.member_db import members_table
 
 router = APIRouter()
 
-logging.basicConfig(level= logging.INFO,format="%(asctime)s |%(level)s| %(message)s",filename="app/app.log")
+
 logger =logging.getLogger(__name__)
 
 @router.get("/summary")

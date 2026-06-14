@@ -16,8 +16,8 @@ library-api/
 │   │   ├── book_routes.py  
 │   │   ├── member_routes.py  
 │   │   └── report_routes.py  
-│   └── logs/  
-│       └── app.log  
+│   └── app.log 
+│         
 │  
 ├── README.md  
 ├── requirements.txt  
@@ -86,11 +86,12 @@ docker run --name libarary_db -e MYSQL_ROOT_PASSWORD=root -e MYSQL_DATABASE=liba
 http request -> fastapi -> endpoints -> query -> database
 
 ## Running instructions
-cd app
-python -m venv venv
-python ./venv/Scripts/activate
-pip install -r requierments.txt
-python main.py
+
+- 1.**python -m venv venv --without-pip**
+- 2.**.\venv\Scripts\Activate.ps1**
+- 3.**pip install -r requierments.txt**
+- 4.**cd app**
+- 5.**python main.py**
 
 
 

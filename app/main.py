@@ -2,7 +2,18 @@ from fastapi import FastAPI
 from  database import db_connection
 from routes import book_routes,member_routes,report_routes
 import uvicorn
+import os
+import logging
 
+os.makedirs("logs", exist_ok=True)
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s|%(levelname)s|%(message)s",
+    filename="logs/app.log"
+)
+
+logger = logging.getLogger(__name__)
+logger.info("Application uploading now ")
 
 app = FastAPI()
 
