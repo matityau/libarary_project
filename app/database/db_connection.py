@@ -20,16 +20,16 @@ def create_tables():
             title VARCHAR(50) NOT NULL,
             author VARCHAR(50) NOT NULL,
             genre ENUM("Fiction","Non-Fiction","Science","History","Other") NOT NULL,
-            available_is BOOLEAN DEFAULT True,
-            id_member_by_borrowed INT DEFAULT NULL
+            is_available BOOLEAN DEFAULT TRUE NOT NULL,
+            borrowed_by_member_id INT DEFAULT NULL
             ); """
     sql_table_members = """
             CREATE TABLE IF NOT EXISTS members(
             id INT PRIMARY  KEY AUTO_INCREMENT,
             name VARCHAR(50) NOT NULL,
             email VARCHAR(100) NOT NULL UNIQUE,
-            is_active BOOLEAN DEFAULT TRUE,
-            borrows_total INT DEFAULT 0
+            is_active BOOLEAN NOT NULL DEFAULT TRUE,
+            total_borrows INT DEFAULT 0
             );"""
     
     cursor.execute(sql_table_books)

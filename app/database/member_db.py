@@ -118,7 +118,7 @@ class Members:
         conn = db_connection.get_connection()
         cursor = conn.cursor()
         sql_increment_borrows = """UPDATE members
-                             SET borrows_total = borrows_total + 1 WHERE id = %s""" 
+                             SET total_borrows = total_borrows + 1 WHERE id = %s""" 
         
         try:
             cursor.execute(sql_increment_borrows,(id,))
@@ -148,7 +148,7 @@ class Members:
     def get_top_member(self):
         conn = db_connection.get_connection()
         cursor = conn.cursor()
-        sql = "SELECT * FROM members ORDER BY borrows_total DESC LIMIT 1;"
+        sql = "SELECT * FROM members ORDER BY total_borrows DESC LIMIT 1;"
         try:
             cursor.execute(sql)
             rows = cursor.fetchone()

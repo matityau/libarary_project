@@ -86,8 +86,8 @@ docker run --name libarary_db -e MYSQL_ROOT_PASSWORD=root -e MYSQL_DATABASE=liba
 http request -> fastapi -> endpoints -> query -> database
 
 ## Running instructions
-
-- 1.**python -m venv venv --without-pip**
+- -(cd libarary_project) במידה ואתה לא בתוך התיקייה הזו היכנסת לתקיית הפרוייקט 
+- 1.**python -m venv venv **
 - 2.**.\venv\Scripts\Activate.ps1**
 - 3.**pip install -r requierments.txt**
 - 4.**cd app**

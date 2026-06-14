@@ -11,9 +11,9 @@ class Books:
     def create_book(self,data:dict):
         conn = db_connection.get_connection()
         cursor = conn.cursor(dictionary=True)
-        sql_insert = """INSERT INTO books (title,author,genre,is_available,borrowed_by=NULL) 
-        VALUES (%s,%s,%s,%s);"""
-        values = (data["title"], data["author"], data["genre"],True)
+        sql_insert = """INSERT INTO books (title, author, genre) 
+            VALUES (%s, %s, %s)"""
+        values = (data["title"], data["author"], data["genre"])
         try:
             cursor.execute(sql_insert,values)
             conn.commit()
