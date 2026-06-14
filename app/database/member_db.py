@@ -119,9 +119,9 @@ class Members:
         cursor = conn.cursor()
         sql_increment_borrows = """UPDATE members
                              SET borrows_total = borrows_total + 1 WHERE id = %s""" 
-        values = (id)
+        
         try:
-            cursor.execute(sql_increment_borrows,(values))
+            cursor.execute(sql_increment_borrows,(id,))
             conn.commit()
             rows = cursor.rowcount
             return rows > 0
@@ -130,6 +130,7 @@ class Members:
         finally:
             cursor.close()
             conn.close() 
+
     def count_active_members(self)-> int:
         conn = db_connection.get_connection()
         cursor = conn.cursor()
@@ -137,12 +138,26 @@ class Members:
         try:
             cursor.execute(sql_count_active)
             rows = cursor.rowcount
-            return rows
+            return rows["total"]
         except Exception as e:
             raise e   
         finally:
             cursor.close()
             conn.close() 
-        
+
+    def get_top_member(self):
+        conn = db_connection.get_connection()
+        cursor = conn.cursor()
+        sql = "SELECT * FROM members ORDER BY borrows_total DESC LIMIT 1;"
+        try:
+            cursor.execute(sql)
+            rows = cursor.rowcount
+            return rows
+        except Exception as e:
+            raise e   
+        finally:
+            cursor.close()
+            conn.close()
+
 
 members_table = Members()

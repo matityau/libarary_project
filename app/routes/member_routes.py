@@ -71,14 +71,17 @@ def update_member(id,data:Member):
 
 @router.patch("/{id}/deactive")
 def deactivate_member(id:int):
-    logger.info(f"PATCH/member/{id}")
+    try:
+        logger.info(f"PATCH/member/{id}")
+        update = members_table.deactivate_member(id)
 
-    update = members_table.deactivate_member(id)
-
-    if not update:
-        logger.warning(f"Member {id} not found")
-        raise HTTPException(status_code=404, detail="Book not found")
-    return {"message":f"Mmeber {id} now is deactive"}
- 
-
+        if not update:
+            logger.warning(f"Member {id} not found")
+            raise HTTPException(status_code=404, detail="Book not found")
+        return {"message":f"Mmeber {id} now is deactive"}
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500,detail=f"error{e}")
+    
 # @router.patch("/{id}/activate")

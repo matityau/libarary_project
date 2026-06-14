@@ -11,7 +11,7 @@ class Books:
     def create_book(self,data:dict):
         conn = db_connection.get_connection()
         cursor = conn.cursor(dictionary=True)
-        sql_insert = """INSERT INTO books (title,author,genre,is_available) 
+        sql_insert = """INSERT INTO books (title,author,genre,is_available,borrowed_by=NULL) 
         VALUES (%s,%s,%s,%s);"""
         values = (data["title"], data["author"], data["genre"],True)
         try:
@@ -87,6 +87,8 @@ class Books:
         values = (val,member_id,book_id) 
 
         try:
+            if not val:
+                cursor.execute("UPDATE books SET borrowed_by_member_id = 0 WHERE id = %s;",(book_id,))
             cursor.execute(sql_update_book,(values))
             conn.commit()
             
@@ -99,14 +101,14 @@ class Books:
             conn.close()
 
 
-    def books_total_count(self)->int:
+    def books_total_count(self):
         conn = db_connection.get_connection()
         cursor = conn.cursor(dictionary=True)
-        sql_count = "SELECT COUNT(*) FROM books;"
+        sql_count = "SELECT COUNT(*)as total  FROM books;"
         try:
             cursor.execute(sql_count)
-            rows = cursor.fetchall()
-            return len(rows)
+            rows = cursor.fetchone()
+            return rows["total"]
         
         except Exception as e:
             raise e   
@@ -142,13 +144,13 @@ class Books:
             cursor.close()
             conn.close()
 
-    def count_by_genre(self,genre):
+    def count_by_genre(self):
         conn = db_connection.get_connection()
         cursor = conn.cursor(dictionary=True)
-        sql_count = "SELECT COUNT(*) FROM books WHERE genre = %s;"
+        sql_count = "SELECT COUNT(*)as total FROM books order by genre;"
         try:
-            cursor.execute(sql_count,(genre,))
-            rows = cursor.fetchall()
+            cursor.execute(sql_count)
+            rows = cursor.fetchone()
             return rows
         except Exception as e:
             raise e
@@ -156,14 +158,15 @@ class Books:
             cursor.close()
             conn.close()
 
-    def count_active_borrows_by_member(self, member_id):
+    def count_active_borrows_by_member(self, member_id)->int:
         conn = db_connection.get_connection()
         cursor = conn.cursor(dictionary=True)
-        sql_count = "SELECT COUNT(*) FROM books WHERE id_member_by_borrowed = %s,is_available = TRUE;"
+        sql_count = """SELECT COUNT(*) as total FROM books 
+                   WHERE borrowed_by_member_id = %s AND is_available = FALSE;"""
         try:
-            cursor.execute(sql_count,(member_id))
-            rows = cursor.fetchall()
-            return rows
+            cursor.execute(sql_count,(member_id,))
+            row = cursor.fetchone()
+            return row["total"] if row else 0
         except Exception as e:
             raise e
         finally:

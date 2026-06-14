@@ -1,5 +1,4 @@
 from fastapi import APIRouter,HTTPException
-from database import book_db
 from database.book_db import book_table
 from database.member_db import members_table
 from pydantic import BaseModel
@@ -90,27 +89,35 @@ def update_book(id,data:BookUpdate):
         raise HTTPException(status_code=500,detail=f"error{e}")
     
 
-@router.patch("/{id}/borrow/{member_id}")
+@router.patch("/{book_id}/borrow/{member_id}")
 def borrow_book(book_id:int,member_id:int):
     try:
-        logger.info(f"PUT/books {id} borrow/{member_id}")
+        logger.info(f"PUT/books {book_id} borrow/{member_id}")
         book = book_table.get_book_by_id(book_id)
         if not book:
             logger.error(f"Book {book_id} not found")
             raise HTTPException(status_code=404,detail=f"Book id:{book_id}not found")
+        if not book["is_available"]:
+             raise HTTPException(status_code=409,detail=f"Book id:{book_id} is not available")
+
         member = members_table.get_member_by_id(member_id)
         
         if not member:
             logger.error(f"member {member_id} not found")
             raise HTTPException(status_code=404,detail="Member not found")
-        sucsses = book_table.set_available(book_id,False,member_id)
-        print(sucsses)
-        if not sucsses: 
+        
+        if book_table.count_active_borrows_by_member(member_id) >= 3:
+            logger.error(f"Maxsimom borrwing books member {member_id}")
+            raise HTTPException(status_code=400,detail=f"Member id:{member_id} is not available to borrowed more books")
+        
+        success = book_table.set_available(book_id,False,member_id)
+        
+        if not success: 
             logger.info(f"book not update")   
             raise HTTPException(status_code=400,detail=f"Book id:{book_id} is not available")
         members_table.increment_borrows(member_id)
         logger.info(f"book{id} borrow by {member_id}") 
-        return {"messaage":f"The book {book_id} is borrow by  member{member_id}"}
+        return {"message":f"The book {book_id} is borrow by  member{member_id}"}
    
     except HTTPException:
         raise
@@ -118,7 +125,38 @@ def borrow_book(book_id:int,member_id:int):
         logger.error(f"Server Error:{e}")
         raise HTTPException(status_code=500,detail=f"error{e}")
     
-
+@router.patch("/{book_id}/return/{member_id}")
+def return_book(book_id:int,member_id:int):
+    try:
+        logger.info(f"PATCH/books {member_id} borrow/{member_id}")
+        book = book_table.get_book_by_id(book_id)
+        if not book:
+            logger.error(f"Book {book_id} not found")
+            raise HTTPException(status_code=404,detail=f"Book id:{book_id}not found")
+       
+        member = members_table.get_member_by_id(member_id)
+        
+        if not member:
+            logger.error(f"member {member_id} not found")
+            raise HTTPException(status_code=404,detail="Member not found")
+        
+        if not member["is_active"]:
+             raise HTTPException(status_code=400,detail=f"Member id:{book_id} is not active")
+        
+        sucsses = book_table.set_available(book_id,True,member_id)
+        
+        if not sucsses: 
+            logger.info(f"book not update")   
+            raise HTTPException(status_code=400,detail=f"Book id:{book_id} is not available")
+        
+        logger.info(f"book{book_id} return by {member_id}") 
+        return {"messaage":f"The book {book_id} is return by  member{member_id}"}
+   
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Server Error:{e}")
+        raise HTTPException(status_code=500,detail=f"error{e}")
 
     
 
