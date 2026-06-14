@@ -15,7 +15,7 @@ class Books:
         values = (data["title"], data["author"], data["genre"],True)
         try:
             cursor.execute(sql_insert,values)
-            self.conn.commit()
+            conn.commit()
             rows = cursor.lastrowid
             return rows
         except Exception as e:
@@ -66,7 +66,7 @@ class Books:
         try:
         
             cursor.execute(sql_update,(values))
-            self.conn.commit()
+            conn.commit()
             rows = cursor.rowcount
             return rows > 0
 
@@ -87,7 +87,7 @@ class Books:
 
         try:
             cursor.execute(sql_update_book,(values))
-            self.conn.commit()
+            conn.commit()
             cursor.close()
             rows = cursor.rowcount
             return rows > 0

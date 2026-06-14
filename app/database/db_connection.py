@@ -27,10 +27,9 @@ def create_tables():
             CREATE TABLE IF NOT EXISTS members(
             id INT PRIMARY  KEY AUTO_INCREMENT,
             name VARCHAR(50) NOT NULL,
-            email VARCHAR(100) NOT NULL,
-            genre ENUM("Fiction","Non-Fiction","Science","History","Other") NOT NULL,
-            active_is BOOLEAN ,
-            borrows_total INT DEFAULT True
+            email VARCHAR(100) NOT NULL UNIQUE,
+            is_active BOOLEAN DEFAULT TRUE,
+            borrows_total INT DEFAULT 0
             );"""
     
     cursor.execute(sql_table_books)
